@@ -19,11 +19,13 @@ public class Reels : MonoBehaviour
     private bool stopped;
     private bool allStopped;
 
-    public List<string> line1;
-    public List<string> line2;
-    public List<string> line3;
+    public List<SpriteRenderer> line1;
+    public List<SpriteRenderer> line2;
+    public List<SpriteRenderer> line3;
 
     public int credit = 100;
+
+    public GameObject fx1;
 
 
     // Initialize Reels components
@@ -60,7 +62,7 @@ public class Reels : MonoBehaviour
 
 
     public void CheckLines(){
-        // determine winnings etc
+        // load symbols
         line1.Clear();
         line1.Add(reel1.GetLocation(1));
         line1.Add(reel2.GetLocation(1));
@@ -81,6 +83,41 @@ public class Reels : MonoBehaviour
         line3.Add(reel3.GetLocation(3));
         line3.Add(reel4.GetLocation(3));
         line3.Add(reel5.GetLocation(3));
+
+        int lineTotal1 = 0;
+
+        if (line1[0].sprite.name ==line1[1].sprite.name && line1[1].sprite.name ==line1[2].sprite.name ) {
+            lineTotal1 = 3;
+        }
+
+        if (line1[1].sprite.name ==line1[2].sprite.name && line1[2].sprite.name ==line1[3].sprite.name ) {
+            lineTotal1 = 3;
+        }
+
+        if (line1[2].sprite.name ==line1[3].sprite.name && line1[3].sprite.name ==line1[4].sprite.name ) {
+            lineTotal1 = 3;
+        }
+
+        if (line1[0].sprite.name ==line1[1].sprite.name  && line1[1].sprite.name == line1[2].sprite.name  && line1[2].sprite.name  == line1[3].sprite.name ) {
+            lineTotal1 = 4;
+        }
+
+        if (line1[1].sprite.name ==line1[2].sprite.name  && line1[2].sprite.name ==line1[3].sprite.name  && line1[3].sprite.name  == line1[4].sprite.name ) {
+            lineTotal1 = 4;
+        }
+
+        highLight(line1[0]);
+        highLight(line1[1]);
+        highLight(line1[2]);
+        
+        Debug.Log(lineTotal1);
+
+        credit = credit + lineTotal1;
+    }
+
+    private void highLight(SpriteRenderer sprite){
+        Instantiate(fx1);
+        fx1.transform.position = sprite.transform.position;
     }
 
 

@@ -195,7 +195,7 @@ public class Reel : MonoBehaviour
         RenderIcons(speed * Time.fixedDeltaTime);
     }
 
-    public string GetLocation(int loc){
+    public SpriteRenderer GetLocation(int loc){
         double yBottom = 3.0;
         if (loc==1) {yBottom=3.0;}
         if (loc==2) {yBottom=0;}
@@ -205,11 +205,10 @@ public class Reel : MonoBehaviour
             // Get reference to the object
             currentIcon = icons[i];
             if (currentIcon.transform.position.y >= yBottom && currentIcon.transform.position.y < yBottom + 3){
-                //Debug.Log(icons[i].GetComponent<SpriteRenderer>().sprite.name);
-                return icons[i].GetComponent<SpriteRenderer>().sprite.name;
+                return icons[i].GetComponent<SpriteRenderer>();
             }
         }
-        return "";
+        return null;
     }
 
     public void Stop()
