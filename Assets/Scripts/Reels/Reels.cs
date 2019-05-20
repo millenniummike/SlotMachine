@@ -109,6 +109,20 @@ public class Reels : MonoBehaviour
         highLight(line1[0]);
         highLight(line1[1]);
         highLight(line1[2]);
+        highLight(line1[3]);
+        highLight(line1[4]);
+
+        highLight(line2[0]);
+        highLight(line2[1]);
+        highLight(line2[2]);
+        highLight(line2[3]);
+        highLight(line2[4]);
+
+        highLight(line3[0]);
+        highLight(line3[1]);
+        highLight(line3[2]);
+        highLight(line3[3]);
+        highLight(line3[4]);
         
         Debug.Log(lineTotal1);
 
