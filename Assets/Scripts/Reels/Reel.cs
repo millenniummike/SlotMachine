@@ -24,7 +24,7 @@ public class Reel : MonoBehaviour
     // Animation/Measurements
     public float speed = 25f;
     private float smoothTime;
-    private float iconHeight;
+    public float iconHeight;
     private float topBound;
     private float bottomBound;
 
@@ -45,7 +45,7 @@ public class Reel : MonoBehaviour
     void Awake()
     {   
         smoothTime = 0.15f;
-        iconHeight = 3f;
+        //iconHeight = 3f;
         topBound = 6f; 
         bottomBound = (topBound - iconHeight * 4);   
         yVelocity = 0.0f;

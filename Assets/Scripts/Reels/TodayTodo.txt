@@ -1,0 +1,16 @@
+Sprint Related Comment
+First bumps on kits-ios are happening.
+
+Yesterday
+Handover release responsibility to Casino team
+Oculus Quest exploration 
+
+Today
+Prepare material for QA and Automation Demo
+Check health of e2e environments for Android and iOS
+
+
+iOS Snapshot Unit Test Snapshot – Andrew Bulhak
+iOS Sports Crash Reporting Overview – Mike Griffin
+iOS Store Versioning Jenkins Job – Declan McDonald
+Android Code Cover Cobertura – Declan McDonald

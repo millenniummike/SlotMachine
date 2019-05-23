@@ -10,7 +10,7 @@ public class GameController : MonoBehaviour
 
     // Game controller components
     [Header("Game Components")]
-    [SerializeField] private Button button;
+    [SerializeField] private FruitMachineButton button;
     [SerializeField] private Reels reels;
 
 

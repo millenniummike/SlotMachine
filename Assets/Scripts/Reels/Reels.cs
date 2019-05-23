@@ -219,10 +219,14 @@ public class Reels : MonoBehaviour
     {
         credit--;
         SpinReels();
+        float delay = UnityEngine.Random.value*3;
+        Invoke("Stop", delay);
     }
 
     public void Stop()
     {
         StopReels();
+        float delay = UnityEngine.Random.value*3;
+        Invoke("Spin", delay);
     } 
 }
