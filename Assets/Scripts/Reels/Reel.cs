@@ -20,13 +20,15 @@ public class Reel : MonoBehaviour
     private int symbolIndex;
     private float xPos;
     private float yPos;
+    private float zPos;
 
     // Animation/Measurements
     public float speed = 25f;
     private float smoothTime;
     public float iconHeight;
-    private float topBound;
-    private float bottomBound;
+    public float topBound;
+    public float bottomBound;
+    public float scaleY;
 
     // Landing animation & calculations/timing  
     private int topMostIndex;
@@ -36,26 +38,22 @@ public class Reel : MonoBehaviour
     private float currentYpos; 
     
     // Reel status
-    private bool canSpin;
-    private bool isSpinning;
-    private bool stopped;
-
+    public bool isSpinning;
+    public bool stopped;
 
     // Initialize reel components
     void Awake()
     {   
         smoothTime = 0.15f;
         //iconHeight = 3f;
-        topBound = 6f; 
-        bottomBound = (topBound - iconHeight * 4);   
+        scaleY=transform.parent.parent.transform.localScale.y;
+        topBound = (transform.localPosition.y + iconHeight * (icons.Length-2)) ; 
+        bottomBound = topBound - iconHeight * (icons.Length);   
         yVelocity = 0.0f;
 
-        // Current state of the reel
-        stopped = true;
-        // Can the reel spin at start up?
-        canSpin = false;
         // Is the reel spinning at start up?
         isSpinning = false;
+        stopped = true;
 
         // Create initial set of icons
         SetIcon(symbols); 
@@ -66,19 +64,16 @@ public class Reel : MonoBehaviour
     // Do not call Stop function inside because it dispatches the full stop event
     void Update()
     {
-        // If reel can spin, start spinning
-        if (canSpin)
+        // If reel needs to spin
+        if (isSpinning)
         {
             Spin();
         }
-        else
+        
+        if (isSpinning && stopped == false)
         {
-            if (isSpinning)
-            {
-                Stop(); 
-            }
-
-        }  
+            Stop(); 
+        }
     } 
 
     // Create initial set of icons
@@ -93,11 +88,12 @@ public class Reel : MonoBehaviour
             currentIcon.sprite = symbol[0];
 
             // Assign the x & y positions of the icons
-            xPos = currentIcon.transform.position.x; 
-            yPos = topBound - (i * iconHeight); 
+            xPos = currentIcon.transform.localPosition.x;
+            yPos = topBound - (i * iconHeight);
+            zPos = currentIcon.transform.localPosition.z;
 
             // Set its position 
-            currentIcon.transform.position = new Vector2(xPos, yPos);  
+            currentIcon.transform.localPosition = new Vector3(xPos, yPos, zPos);
         }
     }
 
@@ -105,10 +101,8 @@ public class Reel : MonoBehaviour
     // Render the set of icons
     private void RenderIcons(float speed)
     {
+        //speed=0;
         // Indicate that the reels have started to spin
-        canSpin = true;
-        stopped = false;
-
         // The reels are now moving
         isSpinning = true; 
 
@@ -118,21 +112,22 @@ public class Reel : MonoBehaviour
             currentIcon = icons[i];
 
             // Apply speed
-            xPos = currentIcon.transform.position.x; 
-            yPos = currentIcon.transform.position.y;
+            xPos = currentIcon.transform.localPosition.x; 
+            yPos = currentIcon.transform.localPosition.y;
+            zPos = currentIcon.transform.localPosition.z;
             yPos -= speed; 
 
             // Update the icon's new position
-            currentIcon.transform.position = new Vector2(xPos, yPos);
+            currentIcon.transform.localPosition = new Vector3(xPos, yPos, zPos);
 
             // Check bounds
-            if (currentIcon.transform.position.y < bottomBound)
+            if (currentIcon.transform.localPosition.y < bottomBound)
             {
                 /*
                  * Update current icon position  
                  */
                 yPos = topBound - speed;      
-                currentIcon.transform.position = new Vector2(xPos, yPos);
+                currentIcon.transform.localPosition = new Vector3(xPos, yPos, zPos);
 
                 // Store its index
                 topMostIndex = i; 
@@ -152,7 +147,7 @@ public class Reel : MonoBehaviour
         currentIcon = icons[topMostIndex];
 
         // Define start position for the animation
-        currentYpos = currentIcon.transform.position.y;
+        currentYpos = currentIcon.transform.localPosition.y;
 
         // Define the target landing position for the animation
         endPoint = topBound - iconHeight;
@@ -162,10 +157,6 @@ public class Reel : MonoBehaviour
 
         // Gradually decrease idling speed until it reaches the "endpoint"   
         RenderIcons(currentYpos - landingPos);
-
-        // Change the reel status to stop
-        canSpin = false;  
-
         /*
          * This is the point where the reels have completely landed/stopped
          */
@@ -173,19 +164,33 @@ public class Reel : MonoBehaviour
         {
             // The reel is no longer spinning
             isSpinning = false;
-            stopped = true;
 
             // Dispatch reel stopped state event
-            if (OnFullStop != null)
+            if (OnFullStop != null && stopped == false)
             { 
                 OnFullStop(); 
+                stopped = true; 
+                SyncSymbols(); 
             }
             else
             {
-                Debug.Log("OnFullStop event is null");
+                //Debug.Log("OnFullStop event is null");
             } 
-        } 
-    }  
+        }
+    } 
+
+        
+    private void SyncSymbols(){
+       // Debug.Log("Syncing symbols");
+        for (int i = 0; i < icons.Length; i++)
+        {
+            currentIcon = icons[i];
+            Vector3 pos = currentIcon.transform.localPosition;
+            float y = pos.y;
+            pos.y = (float)Math.Round(y / 3.0f) * 3;
+            currentIcon.transform.localPosition = pos;
+        }
+    }
 
 
     // PUBLIC METHODS
@@ -193,18 +198,19 @@ public class Reel : MonoBehaviour
     {
         // Move icons by speed * fixed delta time
         RenderIcons(speed * Time.fixedDeltaTime);
+        stopped = false;
     }
 
     public SpriteRenderer GetLocation(int loc){
         double yBottom = 3.0;
         if (loc==1) {yBottom=3.0;}
         if (loc==2) {yBottom=0;}
-        if (loc==3) {yBottom=-3.0;}
+        if (loc==3) {yBottom=-3;}
         for (int i = 0; i < icons.Length; i++)
         {
             // Get reference to the object
-            currentIcon = icons[i];
-            if (currentIcon.transform.position.y >= yBottom && currentIcon.transform.position.y < yBottom + 3){
+            SpriteRenderer icon = icons[i];
+            if (icon.transform.localPosition.y >= yBottom && icon.transform.localPosition.y < yBottom + 3){
                 return icons[i].GetComponent<SpriteRenderer>();
             }
         }
@@ -214,13 +220,5 @@ public class Reel : MonoBehaviour
     public void Stop()
     {
         StartLanding();
-
     }
-
-    public bool HasStopped()
-    {
-        return stopped;
-    }
-
-
 }

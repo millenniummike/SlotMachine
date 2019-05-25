@@ -10,9 +10,10 @@ public class GameController : MonoBehaviour
 
     // Game controller components
     [Header("Game Components")]
-    [SerializeField] private FruitMachineButton button;
     [SerializeField] private Reels reels;
 
+    public bool reelsSpinning = false;
+    public bool stopReelsSpinning = false;
 
     // Add event listeners
     void Awake()
@@ -24,46 +25,41 @@ public class GameController : MonoBehaviour
         reels.OnReelsFullStop += ReelStopHandler;
          
         // Button handlers
-        button.OnClickSpin += ButtonClickSpinHandler;
-        button.OnClickStop += ButtonStopHandler;
-    } 
 
-
-    // Button handler for spinning
-    private void ButtonClickSpinHandler()
-    {
-        // Start spinning & Change button to stop frame
-        reels.Spin(); 
-        button.ChangeToStopFrame();
     }
 
+    void Update(){
+        if (!reelsSpinning) {
+            reelsSpinning = true;
+            reels.SpinReels();
+        }
 
-    // Button handler for stopping/landing
-    private void ButtonStopHandler()
-    {
-        // Disable the button & Start landing animation 
-        button.Disable();
-        reels.Stop();  
+        if (stopReelsSpinning) {
+            reels.StopReels();
+        }
     }
 
-
+    void StartSpin(){
+        reelsSpinning = false;
+    }
     // Reel handler when reels have stopped
     //    private void ReelStopHandler(object sender, EventArgs eventArgs)
     private void ReelStopHandler()
     {
-        // Enable the button & Change the button to spin frame
-        button.Enable();
-        button.ChangeToSpinFrame();
+        float delay = 0.1f;
+        Invoke("checkReels", delay);
+    }
+
+    private void checkReels(){
         reels.CheckLines();
+        float delay = 1;
+        Invoke("StartSpin", delay);  
     }
 
 
     // Unsubscribe handlers to events
     void OnDisable()
     {
-        button.OnClickSpin -= ButtonClickSpinHandler;
-        button.OnClickStop -= ButtonStopHandler; 
         reels.OnReelsFullStop -= ReelStopHandler; 
-    } 
-     
+    }    
 }
