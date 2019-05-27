@@ -21,6 +21,7 @@ public class Reel : MonoBehaviour
     private float xPos;
     private float yPos;
     private float zPos;
+    public int reelPosition;
 
     // Animation/Measurements
     public float speed = 25f;
@@ -40,6 +41,8 @@ public class Reel : MonoBehaviour
     // Reel status
     public bool isSpinning;
     public bool stopped;
+    public bool isStopping;
+    public int targetReelPosition = -1;
 
     // Initialize reel components
     void Awake()
@@ -54,6 +57,7 @@ public class Reel : MonoBehaviour
         // Is the reel spinning at start up?
         isSpinning = false;
         stopped = true;
+        targetReelPosition = -1;
 
         // Create initial set of icons
         SetIcon(symbols); 
@@ -65,27 +69,33 @@ public class Reel : MonoBehaviour
     void Update()
     {
         // If reel needs to spin
-        if (isSpinning)
+        if (isSpinning && isStopping == false)
         {
             Spin();
         }
         
-        if (isSpinning && stopped == false)
+        if (isSpinning && isStopping == true)
         {
             Stop(); 
+        } 
+
+        if (targetReelPosition==reelPosition) {
+            isStopping = true;
+            targetReelPosition = -1;
         }
     } 
 
     // Create initial set of icons
     private void SetIcon(Sprite[] symbol)
     {
+        reelPosition = 0;
         for (int i = 0; i < icons.Length; i++)
         {
             // Get reference to the object
             currentIcon = icons[i];
 
             // Assign a sprite to an icon 
-            currentIcon.sprite = symbol[0];
+            currentIcon.sprite = symbol[i];
 
             // Assign the x & y positions of the icons
             xPos = currentIcon.transform.localPosition.x;
@@ -104,7 +114,7 @@ public class Reel : MonoBehaviour
         //speed=0;
         // Indicate that the reels have started to spin
         // The reels are now moving
-        isSpinning = true; 
+        //isSpinning = true; 
 
         for (int i = 0; i < icons.Length; i++)
         {
@@ -123,6 +133,8 @@ public class Reel : MonoBehaviour
             // Check bounds
             if (currentIcon.transform.localPosition.y < bottomBound)
             {
+                reelPosition++;
+                if (reelPosition>=symbols.Length) {reelPosition=0;}
                 /*
                  * Update current icon position  
                  */
@@ -133,7 +145,10 @@ public class Reel : MonoBehaviour
                 topMostIndex = i; 
 
                 // Give the icon a new random symbol
-                symbolIndex = Random.Range(0, symbols.Length);
+                //symbolIndex = Random.Range(0, symbols.Length);
+                
+                // Choose next symbol on reel
+                symbolIndex = symbols.Length-reelPosition-1;
                 icons[i].GetComponent<SpriteRenderer>().sprite = symbols[symbolIndex];
             }
         } 
@@ -169,7 +184,8 @@ public class Reel : MonoBehaviour
             if (OnFullStop != null && stopped == false)
             { 
                 OnFullStop(); 
-                stopped = true; 
+                stopped = true;
+                isStopping = false;
                 SyncSymbols(); 
             }
             else
@@ -198,7 +214,12 @@ public class Reel : MonoBehaviour
     {
         // Move icons by speed * fixed delta time
         RenderIcons(speed * Time.fixedDeltaTime);
+    }
+
+    public void StartSpin(){
         stopped = false;
+        isSpinning = true;
+        isStopping = false;
     }
 
     public SpriteRenderer GetLocation(int loc){
@@ -220,5 +241,9 @@ public class Reel : MonoBehaviour
     public void Stop()
     {
         StartLanding();
+    }
+
+    public void StopPosition(int position) {
+        targetReelPosition = position;
     }
 }

@@ -13,7 +13,6 @@ public class GameController : MonoBehaviour
     [SerializeField] private Reels reels;
 
     public bool reelsSpinning = false;
-    public bool stopReelsSpinning = false;
 
     // Add event listeners
     void Awake()
@@ -28,20 +27,17 @@ public class GameController : MonoBehaviour
 
     }
 
-    void Update(){
-        if (!reelsSpinning) {
-            reelsSpinning = true;
-            reels.SpinReels();
-        }
-
-        if (stopReelsSpinning) {
-            reels.StopReels();
-        }
+    void Start(){
+        StartSpin();
     }
 
     void StartSpin(){
-        reelsSpinning = false;
+        reelsSpinning = true;
+        reels.SpinReels();
+        float delay = 2f;
+        Invoke("StopReels", delay);
     }
+
     // Reel handler when reels have stopped
     //    private void ReelStopHandler(object sender, EventArgs eventArgs)
     private void ReelStopHandler()
@@ -52,8 +48,11 @@ public class GameController : MonoBehaviour
 
     private void checkReels(){
         reels.CheckLines();
-        float delay = 1;
-        Invoke("StartSpin", delay);  
+        StartSpin();
+    }
+
+    private void StopReels(){
+        reels.StopReels();
     }
 
 

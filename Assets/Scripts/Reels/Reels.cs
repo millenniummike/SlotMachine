@@ -62,13 +62,16 @@ public class Reels : MonoBehaviour
         allStopped = false;
         for (int i = 0; i < reels.Length; i++)
         {
-            reels[i].Spin();
+            reels[i].StartSpin();
+            reels[i].targetReelPosition = -1;
         }
     }
 
 
     public void CheckLines(){
         // load symbols
+
+        // move to serverside
 
         for (int i = 0; i < 8; i++){
             lines[i].Clear();
@@ -101,82 +104,112 @@ public class Reels : MonoBehaviour
         line8.Add(reels[4].GetLocation(2));
         line8.Add(reels[4].GetLocation(3));
 
-
-        int lineTotal1 = 0;
-
         //vertical
+        /*
         for (int i = 3; i < 8; i++){
             List<SpriteRenderer> line = lines[i];
             if (line[0].sprite.name ==line[1].sprite.name && line[1].sprite.name == line[2].sprite.name ) {
-                lineTotal1 = 3;
+                Payout(line[0].sprite.name,1);
                 highLight(line[0]);
                 highLight(line[1]);
                 highLight(line[2]);
             }
         }
+        */
 
         //horizontal
         for (int i = 0; i < 3; i++){
             List<SpriteRenderer> line = lines[i];
 
-
-            if (line[0].sprite.name ==line[1].sprite.name && line[1].sprite.name == line[2].sprite.name ) {
-                lineTotal1 = 3;
+            // 5 in a row
+            if (line[0].sprite.name == line[1].sprite.name  && line[1].sprite.name ==line[2].sprite.name  && line[2].sprite.name ==line[3].sprite.name  && line[3].sprite.name  == line[4].sprite.name ) {
+                Payout(line[0].sprite.name,3);
                 highLight(line[0]);
                 highLight(line[1]);
                 highLight(line[2]);
+                highLight(line[3]);
+                highLight(line[4]);
+                continue;
+            }
+
+            // 4 in a row
+
+            if (line[0].sprite.name == line[1].sprite.name  && line[1].sprite.name == line[2].sprite.name  && line[2].sprite.name  == line[3].sprite.name ) {
+                Payout(line[0].sprite.name,2);
+                highLight(line[0]);
+                highLight(line[1]);
+                highLight(line[2]);
+                highLight(line[3]);
+                continue;
+            }
+
+            if (line[1].sprite.name ==line[2].sprite.name  && line[2].sprite.name ==line[3].sprite.name  && line[3].sprite.name  == line[4].sprite.name ) {
+                Payout(line[0].sprite.name,2);
+                highLight(line[1]);
+                highLight(line[2]);
+                highLight(line[3]);
+                highLight(line[4]);
+                continue;
+            }
+
+            // 3 in a row
+            if (line[0].sprite.name ==line[1].sprite.name && line[1].sprite.name == line[2].sprite.name ) {
+                Payout(line[0].sprite.name,1);
+                highLight(line[0]);
+                highLight(line[1]);
+                highLight(line[2]);
+                continue;
             }
            
 
             if (line[1].sprite.name ==line[2].sprite.name && line[2].sprite.name == line[3].sprite.name ) {
-                lineTotal1 = 3;
+                Payout(line[0].sprite.name,1);
                 highLight(line[1]);
                 highLight(line[2]);
                 highLight(line[3]);
+                continue;
             }
 
 
             if (line[2].sprite.name ==line[3].sprite.name && line[3].sprite.name ==line[4].sprite.name ) {
-                lineTotal1 = 3;
+                Payout(line[0].sprite.name,1);
                 highLight(line[2]);
                 highLight(line[3]);
                 highLight(line[4]);
-            }
-
-            if (line[0].sprite.name == line[1].sprite.name  && line[1].sprite.name == line[2].sprite.name  && line[2].sprite.name  == line[3].sprite.name ) {
-                lineTotal1 = 4;
-                highLight(line[0]);
-                highLight(line[1]);
-                highLight(line[2]);
-                highLight(line[3]);
-            }
-
-            if (line[1].sprite.name ==line[2].sprite.name  && line[2].sprite.name ==line[3].sprite.name  && line[3].sprite.name  == line[4].sprite.name ) {
-                lineTotal1 = 4;
-                highLight(line[1]);
-                highLight(line[2]);
-                highLight(line[3]);
-                highLight(line[4]);
-            }
-
-            if (line[0].sprite.name == line[1].sprite.name  && line[1].sprite.name ==line[2].sprite.name  && line[2].sprite.name ==line[3].sprite.name  && line[3].sprite.name  == line[4].sprite.name ) {
-                lineTotal1 = 5;
-                highLight(line[0]);
-                highLight(line[1]);
-                highLight(line[2]);
-                highLight(line[3]);
-                highLight(line[4]);
+                continue;
             }
         }
+    }
 
-        credit = credit + lineTotal1;
+    private void Payout(string symbol, int number){
+        // number 1 = 3 lines, number 2 = 4 lines, number 3 = 5 lines
+        int lineTotal = 0;
+        switch (symbol) {
+            case "cherries":
+                lineTotal=3 * number;
+            break;
+            case "grapes":
+                lineTotal=5 * number;
+            break;
+            case "coconut":
+                lineTotal=20 * number;
+            break;
+            case "lemon":
+                lineTotal=50 * number;
+            break;
+            case "fruitylandlogo":
+                lineTotal=100 * number;
+            break;
+        }
+        Debug.Log("Payout = " + lineTotal);
+        credit = credit + lineTotal;
     }
 
     private void highLight(SpriteRenderer sprite){
         if (sprite) {
             GameObject go = Instantiate(fx1);
             go.transform.position = sprite.transform.position;
-            }
+        }
     }
 
 
@@ -185,17 +218,22 @@ public class Reels : MonoBehaviour
     {   
         for (int i = 0; i < reels.Length; i++)
         {
-            StartCoroutine(stopReel(reels[i]));
+            int r = UnityEngine.Random.Range(0,31); //** TODO get from server */ 
+            StartCoroutine(stopReel(reels[i],r));
         }
+        //StartCoroutine(stopReel(reels[0],0));
+        //StartCoroutine(stopReel(reels[1],24));
+        //StartCoroutine(stopReel(reels[2],6));
+        //StartCoroutine(stopReel(reels[3],0));
+        //StartCoroutine(stopReel(reels[4],0));
     }
 
-    IEnumerator stopReel(Reel reel)
+    IEnumerator stopReel(Reel reel, int position)
     {
-        //you can replace 3 with the amount of seconds to wait
-        //for a time like 1.2 seconds, use 1.2f (to show it's a float)
-        float delay = UnityEngine.Random.value;
+ 
+        float delay = UnityEngine.Random.Range(1, 2.0f);
         yield return new WaitForSeconds(delay);
-        reel.Stop();
+        reel.StopPosition(position);
     }
 
     // Helper method to check the current moving status of reels
